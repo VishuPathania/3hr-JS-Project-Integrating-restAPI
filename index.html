@@ -9,7 +9,7 @@
 </head>
 <body>
     <div> 
-        <form onsubmit="savetoLocalStorage(event)">
+        <form onsubmit="saveToLocalStorage(event)">
             <div class="form-group">
                 <label for="candy">Candy Name</label>
                 <input type="text" class="form-control" id="candy" name="candy" required>
@@ -28,15 +28,16 @@
                     <option value="sugarfree">sugarfree</option>
                     <option value="misc">Miscellaneous</option>
                 </select>
-           
+            </div>
             <div class="form-group">
                 <label for="quantity">Quantity</label>
                 <input type="number" class="form-control" id="quantity" name="quantity" required>
-          
+            </div>
             <input type="submit" class="btn btn-info" value="Add Item">
         </form>
         <ul id="listofitems"></ul>
     </div>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/axios/1.4.0/axios.min.js"></script>
     <script src="dom.js"></script>
 </body>
 </html>
