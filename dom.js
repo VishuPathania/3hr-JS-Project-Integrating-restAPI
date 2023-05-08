@@ -1,60 +1,93 @@
+async function saveToLocalStorage(event) {
+  try {  
+      event.preventDefault();
+      const candy = event.target.candy.value;
+      const price = event.target.price.value;
+      const description = event.target.description.value;
+      const quantity = event.target.quantity.value;
 
-function savetoLocalStorage(event){
-  event.preventDefault();
-  const candy = event.target.candy.value;
-  const price = event.target.price.value;
-  const description = event.target.description.value;
-  const quantity = event.target.quantity.value;
-  
-  const obj= {
-    candy: candy,
-    price: price,
-    description: description,
-    quantity: quantity
+      const expense = {
+          candy: candy,
+          price: price,
+          description: description,
+          quantity: quantity
+      }
+
+      const response = await axios.post("https://crudcrud.com/api/faa65c25ed3848ef987b193269348517/candyData", expense);
+      console.log(response);
+      showNewcandyOnScreen(response.data);
+  } catch(err) {
+      console.log(err);
   }
-
-  //store in local storage with key as candy
-  localStorage.setItem(obj.candy, JSON.stringify(obj))
-
-  showcandyonScreen(obj) 
 }
 
-function showcandyonScreen(obj) {
-  const parentElem = document.getElementById('listofitems') //create li tag also for new details
-  const childElem = document.createElement('li')
-  childElem.textContent= obj.candy + ' - ' + obj.price + ' - ' + obj.description + ' - ' + obj.quantity ;
-  parentElem.appendChild(childElem)
- 
-  //Adding delete button and functionality DOM 
-  const delBtn= document.createElement('input')
-  delBtn.type = "button"
-  delBtn.style.color= "red"
-  delBtn.style.backgroundColor= "cherry"
-  delBtn.value = 'Delete'
-  delBtn.onclick = () => {
-      localStorage.removeItem(obj.candy)
-      parentElem.removeChild(childElem)
+window.addEventListener('DOMContentLoaded', async () => {
+  try {
+      const response = await axios.get("https://crudcrud.com/api/faa65c25ed3848ef987b193269348517/candyData");
+      for (let i = 0; i < response.data.length; i++) {
+        showNewcandyOnScreen(response.data[i]);
+      }
+  } catch(err) {
+      console.log(err);
   }
-   
- 
-   //Adding EDIT button and functionality DOM 14
-   //We will just delete from li and populate in input
+});
 
-  const editBtn= document.createElement('input')
-  editBtn.type = "button"
-  editBtn.style.color= "blue"
-  editBtn.style.backgroundColor= "yellow"
-  editBtn.value = 'Edit'
-  editBtn.onclick = () => {
-      localStorage.removeItem(obj.candy)
-      parentElem.removeChild(childElem)
-      document.getElementById('candy').value = obj.candy;
-      document.getElementById('price').value = obj.price;
-      document.getElementById('description').value = obj.description;
-      document.getElementById('quantity').value =obj.quantity;
+function showNewcandyOnScreen(expense){
+  document.getElementById('candy').value = '';
+  document.getElementById('price').value = '';
+  document.getElementById('description').value = '';
+  document.getElementById('quantity').value = '';
+
+  if(document.getElementById(expense.description) !== null){
+    removeCandyFromScreen(expense.description);
   }
-  
-  childElem.appendChild(delBtn)
-  childElem.appendChild(editBtn)
-  parentElem.appendChild(childElem)
+
+  const parentNode = document.getElementById('listofitems');
+  const childElem = document.createElement('li');
+  childElem.textContent = expense.candy + ' - ' + expense.price + ' - ' + expense.description + ' - ' + expense.quantity ;
+  childElem.id = expense.description;
+  const editButton = document.createElement('button');
+  editButton.textContent = 'Edit';
+  editButton.classList.add('btn', 'btn-info', 'ml-2');
+  editButton.addEventListener('click', () => {
+    editCandyDetails(expense.candy, expense.price, expense.description, expense.quantity);
+  });
+  const deleteButton = document.createElement('button');
+  deleteButton.textContent = 'Delete';
+  deleteButton.classList.add('btn', 'btn-danger', 'ml-2');
+  deleteButton.addEventListener('click', () => {
+    deleteCandy(expense.description);
+  });
+  childElem.appendChild(editButton);
+  childElem.appendChild(deleteButton);
+  parentNode.appendChild(childElem);
 }
+
+// edit function
+
+function editCandyDetails(candy, price, description, quantity) {
+  document.getElementById('candy').value = candy;
+  document.getElementById('price').value = price;
+  document.getElementById('description').value = description;
+  document.getElementById('quantity').value = quantity;
+
+  deleteCandy(description);
+}
+
+//delete function
+
+async function deleteCandy(description) {
+  try{
+    await axios.delete(`https://crudcrud.com/api/faa65c25ed3848ef987b193269348517/candyData/${description}`);
+    removeCandyFromScreen(description);
+  } catch(err){
+    console.log(err);
+  }
+}
+
+function removeCandyFromScreen(description){
+  const childNodeToBeDeleted = document.getElementById(description);
+  if(childNodeToBeDeleted){
+    childNodeToBeDeleted.remove();
+  }
+} 
